@@ -49,10 +49,12 @@ return {
 	-- ########################## 以下配置需要使用者自定义为本地需要的配置 ########################## --
 
 	-- 生成session的secret，请一定要修改此值为一复杂的字符串，用于加密session
-	session_secret = "3584827dfed45b40328acb6242bdf13b",
+	--session_secret = "3584827dfed45b40328acb6242bdf13b",
+	session_secret = "lhmwzy3584827dfed45b40328acb6242bdf13btest",
 
 	-- 用于存储密码的盐，请一定要修改此值, 一旦使用不能修改，用户也可自行实现其他密码方案
-	pwd_secret = "salt_secret_for_password", 
+	--pwd_secret = "salt_secret_for_password", 
+	pwd_secret = "lhmwzy_salt_secret_for_password_for test", 
 
 	-- mysql配置
 	mysql = {
@@ -60,9 +62,9 @@ return {
 		connect_config = {
 			host = "127.0.0.1",
 	        port = 3306,
-	        database = "blog",
+	        database = "lorask",
 	        user = "root",
-	        password = "",
+	        password = "pass",
 	        max_packet_size = 1024 * 1024
 		},
 		pool_config = {
@@ -74,7 +76,7 @@ return {
 	
 	-- 上传文件配置，如上传的头像、文章中的图片等
 	upload_config = {
-		dir = "/data/openresty-china/static", -- 文件目录，修改此值时须同时修改nginx配置文件中的$static_files_path值
+		dir = "/home/www/lorask/static", -- 文件目录，修改此值时须同时修改nginx配置文件中的$static_files_path值
 	},	
 
 }

@@ -20,10 +20,20 @@ function topic_model:new(title, content, user_id, user_name, category_id)
             {title, content, tonumber(user_id), user_name, tonumber(category_id), now})
 end
 
-function topic_model:update(topic_id, title, content, user_id, category_id)
+function topic_model:update(topic_id, title, content, user_id, category_id,isadmin)
+	
 	local now = utils.now()
-    return db:query("update topic set title=?, content=?, category_id=?, update_time=? where id=? and user_id=?",
-            {title, content,  tonumber(category_id), now, tonumber(topic_id), tonumber(user_id)})
+	if isadmin then
+    		return db:query("update topic set title=?, content=?, category_id=?, update_time=? where id=?", {title, content,  tonumber(category_id), now, tonumber(topic_id)})
+	else
+    		return db:query("update topic set title=?, content=?, category_id=?, update_time=? where id=? and user_id=?", {title, content,  tonumber(category_id), now, tonumber(topic_id), tonumber(user_id)})
+		end
+end
+
+function topic_model:update_byadmin(topic_id, title, content, category_id)
+	local now = utils.now()
+    return db:query("update topic set title=?, content=?, category_id=?, update_time=? where id=?",
+            {title, content,  tonumber(category_id), now, tonumber(topic_id)})
 end
 
 function topic_model:get_my_topic(user_id, id)
@@ -31,6 +41,12 @@ function topic_model:get_my_topic(user_id, id)
     	" left join user u on t.user_id=u.id " .. 
     	" left join category c on t.category_id=c.id " ..
     	" where t.id=? and user_id=?", {tonumber(id),tonumber(user_id)})
+end
+
+function topic_model:get_topic_foradmin(id)
+    return db:query("select t.*, c.name as category_name from topic t "..
+    	" left join category c on t.category_id=c.id " ..
+    	" where t.id=?", {tonumber(id)})
 end
 
 

@@ -5,6 +5,7 @@ local lor = require("lor.index")
 local topic_model = require("app.model.topic")
 local collect_model = require("app.model.collect")
 local like_model = require("app.model.like")
+local user_model = require("app.model.user")
 local topic_router = lor:Router()
 
 local function isself(req, uid)
@@ -14,12 +15,30 @@ local function isself(req, uid)
         local userid = req.session.get('user').userid
         if uid and userid and uid==userid then
             result= true
+	else
+	    local isadmin,err = user_model:checkisadmin(userid)
+            if isadmin and not err then
+               result= true
+	    end
         end
     end
 
     return result
 end
 
+local function isadmin(req)
+    local result = false
+
+    if req and req.session and req.session.get("user") then
+        local userid = req.session.get('user').userid
+	local isadmin,err = user_model:checkisadmin(userid)
+        if isadmin and not err then
+            result= true
+        end
+    end
+
+    return result
+end
 topic_router:get("/:topic_id/delete", function(req, res, next)
     local topic_id = req.params.topic_id
     local userid = req.session.get("user").userid
@@ -94,11 +113,13 @@ topic_router:get("/:topic_id/query", function(req, res, next)
     else
         local topic = result[1]
         local is_self = isself(req, topic.user_id)
+	local is_admin = isadmin(req)
         res:json({
             success = true,
             data = {
                 topic = topic,
                 is_self = is_self,
+		is_admin = is_admin,
                 meta = {
                     is_collect = is_collect,
                     is_like = is_like
@@ -185,15 +206,29 @@ topic_router:get("/:topic_id/edit", function(req, res, next)
     end
 
     -- topic_id must be number
-    local result, err = topic_model:get_my_topic(current_userid, topic_id)
-    if not result or err or type(result) ~= "table" or #result ~= 1 then
-        res:render("error", {
-            errMsg = "您要编辑的文章不存在或者您没有权限编辑."
-        })
+    local isadmin = isadmin(req)
+    if isadmin then
+        local result, err = topic_model:get_topic_foradmin(topic_id)
+    	if not result or err or type(result) ~= "table" or #result ~= 1 then
+        	res:render("error", {
+            	errMsg = "您要编辑的文章不存在或者您没有权限编辑."
+            })
+    	else
+       		res:render("topic/edit",{
+            	topic = result[1]
+            })
+    	end
     else
-        res:render("topic/edit",{
-            topic = result[1]
-        })
+        local result, err = topic_model:get_my_topic(current_userid, topic_id)
+    	if not result or err or type(result) ~= "table" or #result ~= 1 then
+        	res:render("error", {
+            	errMsg = "您要编辑的文章不存在或者您没有权限编辑."
+            })
+    	else
+       		res:render("topic/edit",{
+            	topic = result[1]
+            })
+    	end
     end
 end)
 
@@ -202,7 +237,7 @@ topic_router:post("/edit", function(req, res, next)
     local title = req.body.title
     local content = req.body.content
     local topic_id = req.body.topic_id
-
+    local isadmin = isadmin(req) 	
     local user = req.session.get("user")
     local user_id = user.userid
 
@@ -228,7 +263,7 @@ topic_router:post("/edit", function(req, res, next)
         return
     end
 
-    local result, err = topic_model:update(topic_id, title, content, user_id, category_id)
+    local result, err = topic_model:update(topic_id, title, content, user_id, category_id,isadmin)
     if not result or err then
         res:json({
             success = false,

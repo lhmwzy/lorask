@@ -32,12 +32,12 @@ function DB:exec(sql)
         return
     end
 
-    ngx.log(ngx.ERR, "connected to mysql, reused_times:", db:get_reused_times(), " sql:", sql)
+    --ngx.log(ngx.ERR, "connected to mysql, reused_times:", db:get_reused_times(), " sql:", sql)
 
     db:query("SET NAMES utf8")
     local res, err, errno, sqlstate = db:query(sql)
     if not res then
-        ngx.log(ngx.ERR, "bad result: ", err, ": ", errno, ": ", sqlstate, ".")
+       -- ngx.log(ngx.ERR, "bad result: ", err, ": ", errno, ": ", sqlstate, ".")
     end
 
     local ok, err = db:set_keepalive(conf.pool_config.max_idle_timeout, conf.pool_config.pool_size)

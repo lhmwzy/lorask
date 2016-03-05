@@ -6,7 +6,7 @@ local function _set_header(options)
     local suffix = options.suffix or false
 
     return function(req, res, time) 
-        if ngx.req.get_headers()[header] then
+	if ngx.req.get_headers()[header] then
           return
         end
 
@@ -34,7 +34,6 @@ local function _wrap(prev_send, res, fn)
 end
 
 local function _inject(res, fn)
-
     res._send = _wrap(res._send, res, fn)
 end
 

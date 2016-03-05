@@ -73,5 +73,13 @@ function user_model:get_total_count()
     end
 end
 
+function user_model:checkisadmin(id)
+	local res,err = db:query("select is_admin from user where id=?",{tonumber(id)})	
+	if err or not res or #res ~=1 or  res[1].is_admin ~=1 then
+		return false
+	else
+		return true
+	end
+end
 
 return user_model

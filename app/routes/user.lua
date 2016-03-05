@@ -26,6 +26,20 @@ local function isself(req, uid)
     return result
 end
 
+local function isadmin(req)
+    local result = false
+
+    if req and req.session and req.session.get("user") then
+        local userid = req.session.get('user').userid
+	local isadmin,err = user_model:checkisadmin(userid)
+        if isadmin and not err then
+            result= true
+        end
+    end
+
+    return result
+end
+
 local function get_relation(id1, id2, flag)
     local relation = 0
     local is_follow = false
